@@ -5,6 +5,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+// ZapLogger is wrapper around underlying zap.Logger.
 type ZapLogger struct {
 	logger *zap.Logger
 }

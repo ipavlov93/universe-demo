@@ -4,6 +4,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// Logger usage makes it possible swap logger in the future.
 type Logger interface {
 	// Sync flushing any buffered log entries.
 	// Applications should take care to call Sync before exiting.
