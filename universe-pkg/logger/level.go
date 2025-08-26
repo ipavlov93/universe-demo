@@ -15,6 +15,7 @@ func ParseLevelOrDefault(level string, fallback zapcore.Level) zapcore.Level {
 	return logLevel
 }
 
+// ParseLevel will parse given level if it's not empty. Otherwise, returns an error.
 func ParseLevel(level string) (zapcore.Level, error) {
 	if level == "" {
 		return 0, fmt.Errorf("empty log level")

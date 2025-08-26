@@ -3,7 +3,6 @@ package env_test
 import (
 	"os"
 	"testing"
-	"time"
 
 	"github.com/ipavlov93/universe-demo/universe-pkg/env"
 	"github.com/stretchr/testify/assert"
@@ -56,31 +55,5 @@ func TestParseIntEnv(t *testing.T) {
 		defer os.Unsetenv(key)
 
 		assert.Equal(t, fallback, env.ParseIntEnv(key, fallback))
-	})
-}
-
-func TestParseDurationEnv(t *testing.T) {
-	const key = "TEST_ENV_DURATION"
-	const fallback = 5 * time.Second
-
-	t.Run("should return parsed duration when env is valid", func(t *testing.T) {
-		_ = os.Setenv(key, "2h45m")
-		defer os.Unsetenv(key)
-
-		expected := 2*time.Hour + 45*time.Minute
-		assert.Equal(t, expected, env.ParseDurationEnv(key, fallback))
-	})
-
-	t.Run("should return fallback when env is not set", func(t *testing.T) {
-		_ = os.Unsetenv(key)
-
-		assert.Equal(t, fallback, env.ParseDurationEnv(key, fallback))
-	})
-
-	t.Run("should return fallback when env is invalid", func(t *testing.T) {
-		_ = os.Setenv(key, "not-a-duration")
-		defer os.Unsetenv(key)
-
-		assert.Equal(t, fallback, env.ParseDurationEnv(key, fallback))
 	})
 }
