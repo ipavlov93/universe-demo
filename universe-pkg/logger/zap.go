@@ -21,10 +21,7 @@ func (z *ZapLogger) Error(msg string, fields ...zap.Field) { z.logger.Error(msg,
 func (z *ZapLogger) Fatal(msg string, fields ...zap.Field) { z.logger.Fatal(msg, fields...) }
 
 func NewWithCore(core zapcore.Core, options ...zap.Option) *ZapLogger {
-	options = append([]zap.Option{
-		zap.AddCaller(),
-		zap.AddCallerSkip(1),
-	}, options...)
+	options = append(options, zap.AddCallerSkip(1))
 
 	return &ZapLogger{
 		logger: zap.New(core, options...),
