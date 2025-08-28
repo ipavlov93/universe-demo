@@ -15,11 +15,6 @@ var messageRegistry = map[Type]func() Payload{
 	TypeProductDeleted: func() Payload { return &ProductDeletedEvent{} },
 }
 
-func messageTypeFound(msgType string) (Type, bool) {
-	messageType := Type(msgType)
-	return messageType, messageType.Valid()
-}
-
 func ParsePayload(msgType string, payload []byte) (json.Unmarshaler, error) {
 	messageType, ok := messageTypeFound(msgType)
 	if !ok {
@@ -37,4 +32,9 @@ func ParsePayload(msgType string, payload []byte) (json.Unmarshaler, error) {
 	}
 
 	return v, nil
+}
+
+func messageTypeFound(msgType string) (Type, bool) {
+	messageType := Type(msgType)
+	return messageType, messageType.Valid()
 }

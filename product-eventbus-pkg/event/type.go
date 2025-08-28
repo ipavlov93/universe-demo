@@ -14,20 +14,20 @@ const (
 	TypeProductDeleted Type = "product.deleted"
 )
 
-var validMessageTypes = map[Type]struct{}{
+var validTypes = map[Type]struct{}{
 	TypeProductCreated: {},
 	TypeProductDeleted: {},
 }
 
 func (t Type) Valid() bool {
-	if _, ok := validMessageTypes[t]; !ok {
+	if _, ok := validTypes[t]; !ok {
 		return false
 	}
 	return true
 }
 
 func (t Type) String() string {
-	_, ok := validMessageTypes[t]
+	_, ok := validTypes[t]
 	if !ok {
 		return fmt.Sprintf("Type(%s)", string(t))
 	}

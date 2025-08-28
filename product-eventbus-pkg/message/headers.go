@@ -25,6 +25,9 @@ func (h *Headers) Validate() error {
 	if h.Type == "" {
 		return errors.New("header type is required")
 	}
+	if h.Producer == "" {
+		return errors.New("producer is required")
+	}
 	if h.MessageCreatedAt.IsZero() {
 		return errors.New("header messageCreatedAt is required")
 	}
@@ -37,14 +40,5 @@ func NewHeaders(msgType event.Type, producer string) *Headers {
 		Type:             msgType.String(),
 		Producer:         producer,
 		MessageCreatedAt: time.Now().UTC(),
-	}
-}
-
-func (h *Headers) SetDefaultHeaders() {
-	if h.MessageID == "" {
-		h.MessageID = id.NewMessageID()
-	}
-	if h.MessageCreatedAt.IsZero() {
-		h.MessageCreatedAt = time.Now().UTC()
 	}
 }
