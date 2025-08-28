@@ -11,7 +11,7 @@ type Headers struct {
 	MessageID        string    `json:"message_id"`
 	CorrelationID    string    `json:"correlation_id,omitempty"`
 	CausationID      string    `json:"causation_id,omitempty"`
-	Type             string    `json:"type"`
+	EventType        string    `json:"event_type"`
 	Version          int       `json:"version,omitempty"`
 	MessageCreatedAt time.Time `json:"message_created_at"`
 	Producer         string    `json:"producer"`
@@ -21,7 +21,7 @@ func (h *Headers) Validate() error {
 	if h.MessageID == "" {
 		return errors.New("header messageID is required")
 	}
-	if h.Type == "" {
+	if h.EventType == "" {
 		return errors.New("header type is required")
 	}
 	if h.Producer == "" {
@@ -36,7 +36,7 @@ func (h *Headers) Validate() error {
 func NewHeaders(msgType event.Type, producer string) *Headers {
 	return &Headers{
 		MessageID:        NewMessageID(),
-		Type:             msgType.String(),
+		EventType:        msgType.String(),
 		Producer:         producer,
 		MessageCreatedAt: time.Now().UTC(),
 	}

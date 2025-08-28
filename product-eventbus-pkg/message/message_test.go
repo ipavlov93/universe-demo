@@ -30,7 +30,7 @@ func TestMessage_Decode(t *testing.T) {
 		require.NoError(t, err)
 
 		// ASSERT
-		assert.Equal(t, "product.created", decodedMessage.Headers.Type)
+		assert.Equal(t, "product.created", decodedMessage.Headers.EventType)
 		assert.Equal(t, "test-producer", decodedMessage.Headers.Producer)
 		assert.Equal(t, "abc-123", decodedMessage.Headers.MessageID)
 	})

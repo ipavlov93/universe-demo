@@ -29,7 +29,7 @@ func (t Type) Valid() bool {
 func (t Type) String() string {
 	_, ok := validTypes[t]
 	if !ok {
-		return fmt.Sprintf("Type(%s)", string(t))
+		return fmt.Sprintf("EventType(%s)", string(t))
 	}
 	return string(t)
 }
