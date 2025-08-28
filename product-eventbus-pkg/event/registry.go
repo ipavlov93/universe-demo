@@ -16,12 +16,12 @@ var messageRegistry = map[Type]func() Payload{
 }
 
 func ParsePayload(msgType string, payload []byte) (json.Unmarshaler, error) {
-	messageType, ok := messageTypeFound(msgType)
+	eventType, ok := eventTypeFound(msgType)
 	if !ok {
 		return nil, fmt.Errorf("unknown message type %s", msgType)
 	}
 
-	constructor, ok := messageRegistry[messageType]
+	constructor, ok := messageRegistry[eventType]
 	if !ok {
 		return nil, fmt.Errorf("unsupported message type: %s", msgType)
 	}
@@ -34,7 +34,7 @@ func ParsePayload(msgType string, payload []byte) (json.Unmarshaler, error) {
 	return v, nil
 }
 
-func messageTypeFound(msgType string) (Type, bool) {
-	messageType := Type(msgType)
-	return messageType, messageType.Valid()
+func eventTypeFound(t string) (Type, bool) {
+	eventType := Type(t)
+	return eventType, eventType.Valid()
 }

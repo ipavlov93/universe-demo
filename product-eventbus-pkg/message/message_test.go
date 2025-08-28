@@ -19,7 +19,7 @@ func TestMessage_Decode(t *testing.T) {
 		payloadBytes := `{}`
 
 		jsonString := fmt.Sprintf(
-			`{"headers":{"type":"product.created","producer":"test-producer","message_id":"abc-123"},"payload":%s}`,
+			`{"headers":{"event_type":"product.created","producer":"test-producer","message_id":"abc-123"},"payload":%s}`,
 			string(payloadBytes))
 
 		var decodedMessage Message

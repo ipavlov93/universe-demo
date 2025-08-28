@@ -22,10 +22,10 @@ func (h *Headers) Validate() error {
 		return errors.New("header messageID is required")
 	}
 	if h.EventType == "" {
-		return errors.New("header type is required")
+		return errors.New("header event type is required")
 	}
 	if h.Producer == "" {
-		return errors.New("producer is required")
+		return errors.New("header producer is required")
 	}
 	if h.MessageCreatedAt.IsZero() {
 		return errors.New("header messageCreatedAt is required")
@@ -33,10 +33,10 @@ func (h *Headers) Validate() error {
 	return nil
 }
 
-func NewHeaders(msgType event.Type, producer string) *Headers {
+func NewHeaders(eventType event.Type, producer string) *Headers {
 	return &Headers{
 		MessageID:        NewMessageID(),
-		EventType:        msgType.String(),
+		EventType:        eventType.String(),
 		Producer:         producer,
 		MessageCreatedAt: time.Now().UTC(),
 	}
