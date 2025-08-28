@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/ipavlov93/universe-demo/product-eventbus-pkg/event"
-	"github.com/ipavlov93/universe-demo/product-eventbus-pkg/message/id"
 )
 
 type Headers struct {
@@ -36,7 +35,7 @@ func (h *Headers) Validate() error {
 
 func NewHeaders(msgType event.Type, producer string) *Headers {
 	return &Headers{
-		MessageID:        id.NewMessageID(),
+		MessageID:        NewMessageID(),
 		Type:             msgType.String(),
 		Producer:         producer,
 		MessageCreatedAt: time.Now().UTC(),
