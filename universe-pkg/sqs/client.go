@@ -13,13 +13,13 @@ import (
 func NewClientSQS(
 	ctx context.Context,
 	sessionKey string,
-	socket string,
+	baseURL string,
 	defaultRegion string,
 	accessKeyID string,
 	accessKeySecret string,
 ) (*sqs.Client, error) {
 	config, err := sqsconfig.LoadDefaultConfig(ctx,
-		sqsconfig.WithRegion(defaultRegion),
+		sqsconfig.WithDefaultRegion(defaultRegion),
 		sqsconfig.WithCredentialsProvider(
 			credentials.NewStaticCredentialsProvider(accessKeyID, accessKeySecret, sessionKey),
 		),
@@ -29,7 +29,7 @@ func NewClientSQS(
 	}
 
 	client := sqs.NewFromConfig(config, func(o *sqs.Options) {
-		o.BaseEndpoint = aws.String(socket)
+		o.BaseEndpoint = aws.String(baseURL)
 	})
 
 	return client, nil
