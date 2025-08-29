@@ -6,7 +6,6 @@ import (
 
 // Config represents app config
 type Config struct {
-	ServerPort    int
 	MinLogLevel   string
 	LocalStackCfg LocalStackConfig
 }
@@ -25,8 +24,8 @@ func LoadConfigEnv() Config {
 	return Config{
 		MinLogLevel: env.EnvironmentVariable("APP_MIN_LOG_LEVEL", "info"),
 		LocalStackCfg: LocalStackConfig{
-			Host:            env.EnvironmentVariable("LOCAL_STACK_HOST", "localhost"),
-			Port:            env.ParseIntEnv("LOCAL_STACK_PORT", 4566),
+			Host:            env.EnvironmentVariable("LOCALSTACK_HOST", "localhost"),
+			Port:            env.ParseIntEnv("LOCALSTACK_PORT", 4566),
 			DefaultRegion:   env.EnvironmentVariable("AWS_DEFAULT_REGION", "us-east-1"),
 			AccessKeyID:     env.EnvironmentVariable("AWS_ACCESS_KEY_ID", "universe-demo"),
 			SecretAccessKey: env.EnvironmentVariable("AWS_SECRET_ACCESS_KEY", "universe-demo-secret"),
