@@ -19,5 +19,10 @@ func New(w io.Writer, minLevel zapcore.Level) *logger.ZapLogger {
 		minLevel,
 	)
 
-	return logger.NewWithCore(core)
+	options := []zap.Option{
+		zap.AddCaller(),
+		zap.AddCallerSkip(1),
+	}
+
+	return logger.NewWithCore(core, options...)
 }
