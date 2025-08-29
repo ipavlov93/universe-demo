@@ -7,14 +7,14 @@ import (
 )
 
 type ProductDeletedEvent struct {
-	ID          string
+	ID          int64
 	Name        string
 	Description string
 	DeletedAt   time.Time
 }
 
 type productDeleted struct {
-	ID          string `json:"id"`
+	ID          int64  `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description,omitempty"`
 	DeletedAt   string `json:"deleted_at"`
