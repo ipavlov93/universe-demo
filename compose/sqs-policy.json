@@ -1,0 +1,4 @@
+{
+  "maxReceiveCount": "5",
+  "deadLetterTargetArn": "REPLACE_WITH_DLQ_ARN"
+}

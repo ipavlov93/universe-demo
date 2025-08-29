@@ -1,0 +1,102 @@
+services:
+  product-sv:
+    container_name: product-sv
+    build:
+      context: ..
+      dockerfile: ./product-sv/docker/Dockerfile
+    ports:
+      - "${PRODUCT_SV_PORT:-8080}:8080"
+    depends_on:
+      - product-sv-db
+    env_file:
+      - .env
+    environment:
+      - APP_MIN_LOG_LEVEL=${APP_MIN_LOG_LEVEL}
+      - PRODUCT_SV_HTTP_SERVER_PORT=8080
+      - PROMETHEUS_HOST=universe-demo-prometheus
+      - POSTGRES_HOST=product-sv-db
+      - LOCALSTACK_HOST=universe-demo-localstack
+      - LOCALSTACK_PORT=${LOCALSTACK_PORT}
+      - LOCALSTACK_PRODUCT_SV_QUEUE=${LOCALSTACK_PRODUCT_SV_QUEUE}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - POSTGRES_DB_NAME=${POSTGRES_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_OPTION=${POSTGRES_OPTION}
+    networks:
+      - universe-demo-network
+
+  notification-sv:
+    container_name: notification-sv
+    build:
+      context: ..
+      dockerfile: ./notification-sv/docker/Dockerfile
+    ports:
+      - "${NOTIFICATION_SV_PORT:-8080}:8080"
+    environment:
+      - APP_MIN_LOG_LEVEL=${APP_MIN_LOG_LEVEL}
+      - LOCALSTACK_HOST=universe-demo-localstack
+      - LOCALSTACK_PORT=${LOCALSTACK_PORT}
+      - LOCALSTACK_PRODUCT_SV_QUEUE=${LOCALSTACK_PRODUCT_SV_QUEUE}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    depends_on:
+      universe-demo-localstack:
+        condition: service_healthy
+    networks:
+      - universe-demo-network
+
+  product-sv-db:
+    image: postgres:16
+    container_name: product-sv-db
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB_NAME}
+    volumes:
+      - ./docker-init-db.sh:/docker-entrypoint-initdb.d/init-user-db.sh:ro
+      - database_postgres:/var/lib/postgresql/data
+    networks:
+      - universe-demo-network
+
+  universe-demo-prometheus:
+    image: prom/prometheus:v3.5.0
+    ports:
+      - "${PROMETHEUS_PORT}:9090"
+    volumes:
+      - "./prometheus.yml:/etc/prometheus/prometheus.yml"
+    networks:
+      - universe-demo-network
+
+  universe-demo-localstack:
+    container_name: localstack
+    image: localstack/localstack:4.7
+    ports:
+      - "${LOCALSTACK_PORT}:4566"
+    environment:
+      - SERVICES=sqs,s3
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    volumes:
+      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh"
+    networks:
+      - universe-demo-network
+
+volumes:
+  database_postgres:
+  prometheus:
+  localstack:
+
+networks:
+  universe-demo-network:
+    driver: bridge
