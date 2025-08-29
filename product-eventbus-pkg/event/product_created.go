@@ -31,13 +31,15 @@ func (p *ProductCreatedEvent) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	createdAt, err := time.Parse(timeFormatRFC3339, aux.CreatedAt)
-	if err != nil {
-		return fmt.Errorf("invalid created_at: %v", err)
+	var createdAt time.Time
+	if aux.CreatedAt != "" {
+		timestamp, err := time.Parse(timeFormatRFC3339, aux.CreatedAt)
+		if err != nil {
+			return fmt.Errorf("invalid created_at: %v", err)
+		}
+		createdAt = timestamp
 	}
-
 	p.setEvent(&aux, createdAt)
-
 	return nil
 }
 

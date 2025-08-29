@@ -31,13 +31,15 @@ func (p *ProductDeletedEvent) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	deletedAt, err := time.Parse(timeFormatRFC3339, aux.DeletedAt)
-	if err != nil {
-		return fmt.Errorf("invalid createdAt: %v", err)
+	var deletedAt time.Time
+	if aux.DeletedAt != "" {
+		timestamp, err := time.Parse(timeFormatRFC3339, aux.DeletedAt)
+		if err != nil {
+			return fmt.Errorf("invalid deleted_at: %v", err)
+		}
+		deletedAt = timestamp
 	}
-
 	p.setEvent(&aux, deletedAt)
-
 	return nil
 }
 
