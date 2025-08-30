@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/ipavlov93/universe-demo/product-eventbus-pkg/event"
+	msgpkg "github.com/ipavlov93/universe-demo/product-eventbus-pkg/message"
 	"github.com/ipavlov93/universe-demo/universe-pkg/logger"
 	"go.uber.org/zap"
 
@@ -44,22 +45,43 @@ func (m *MessageLogger) Process(
 
 			var receiptHandles []string
 			for _, envelope := range envelopes {
-				msg := envelope.Message
-
-				eventPayload, err := event.ParsePayload(msg.Headers.EventType, msg.Payload)
-				if err != nil {
-					m.lg.Error("failed to parse message payload", zap.Error(err))
+				if envelope == nil {
+					continue
 				}
 
-				m.lg.Info("Message logged",
-					zap.String("message_id", msg.Headers.MessageID),
-					zap.String("message_type", msg.Headers.EventType),
-					zap.String("producer", msg.Headers.Producer),
-					zap.Any("event", eventPayload),
-				)
+				// todo: add error sending to separate channel
+				m.ParseAndLogMessage(envelope.Message)
+
 				receiptHandles = append(receiptHandles, envelope.ReceiptHandle)
 			}
 			out <- receiptHandles
 		}
 	}
+}
+
+func (m *MessageLogger) ParseAndLogMessage(msg *msgpkg.Message) error {
+	if msg == nil {
+		return nil
+	}
+
+	eventPayload, err := event.ParsePayload(msg.Headers.EventType, msg.Payload)
+	if err != nil {
+		return err
+	}
+
+	m.logMessage(msg, eventPayload)
+	return nil
+}
+
+func (m *MessageLogger) logMessage(msg *msgpkg.Message, eventPayload any) {
+	if msg == nil {
+		return
+	}
+
+	m.lg.Info("Message logged",
+		zap.String("message_id", msg.Headers.MessageID),
+		zap.String("event_type", msg.Headers.EventType),
+		zap.String("producer", msg.Headers.Producer),
+		zap.Any("event", eventPayload),
+	)
 }
