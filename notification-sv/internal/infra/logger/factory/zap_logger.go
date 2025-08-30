@@ -1,4 +1,4 @@
-package zap
+package factory
 
 import (
 	"io"
@@ -8,8 +8,9 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// New logs to the given io.Writer (zapcore.WriteSyncer) using JSON encoding with RFC3339 timestamps.
-func New(w io.Writer, minLevel zapcore.Level) *logger.ZapLogger {
+// NewZapLogger constructs logger.
+// logger.ZapLogger write logs to the given io.Writer (zapcore.WriteSyncer) using JSON encoding with RFC3339 timestamps.
+func NewZapLogger(w io.Writer, minLevel zapcore.Level) *logger.ZapLogger {
 	cfg := zap.NewProductionEncoderConfig()
 	cfg.EncodeTime = zapcore.RFC3339TimeEncoder
 
