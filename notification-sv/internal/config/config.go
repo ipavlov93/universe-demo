@@ -6,8 +6,9 @@ import (
 
 // Config represents app config
 type Config struct {
-	MinLogLevel   string
-	LocalStackCfg LocalStackConfig
+	MinLogLevel       string
+	WorkersBufferSize int
+	LocalStackCfg     LocalStackConfig
 }
 
 type LocalStackConfig struct {
@@ -22,7 +23,8 @@ type LocalStackConfig struct {
 // LoadConfigEnv sets Config with environment variables values
 func LoadConfigEnv() Config {
 	return Config{
-		MinLogLevel: env.EnvironmentVariable("APP_MIN_LOG_LEVEL", "info"),
+		MinLogLevel:       env.EnvironmentVariable("APP_MIN_LOG_LEVEL", "info"),
+		WorkersBufferSize: env.ParseIntEnv("APP_WORKERS_BUFFER_SIZE", 10),
 		LocalStackCfg: LocalStackConfig{
 			Host:            env.EnvironmentVariable("LOCALSTACK_HOST", "localhost"),
 			Port:            env.ParseIntEnv("LOCALSTACK_PORT", 4566),

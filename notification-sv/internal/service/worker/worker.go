@@ -8,30 +8,43 @@ import (
 	"github.com/ipavlov93/universe-demo/notification-sv/internal/service"
 )
 
-func RunWorkers(
-	ctx context.Context,
+type Service struct {
+	consumer         service.Consumer
+	messageProcessor service.MessageProcessor
+	chanBufferSize   int
+}
+
+func NewWorkerService(
 	consumer service.Consumer,
-	processor service.MessageProcessor,
-	wg *sync.WaitGroup,
-) {
-	input := make(chan []*message.Envelope, 10)
-	out := make(chan []string, 10)
+	messageProcessor service.MessageProcessor,
+	chanBufferSize int,
+) Service {
+	return Service{
+		consumer:         consumer,
+		messageProcessor: messageProcessor,
+		chanBufferSize:   chanBufferSize,
+	}
+}
+
+func (s Service) RunWorkers(ctx context.Context, wg *sync.WaitGroup) {
+	input := make(chan []*message.Envelope, s.chanBufferSize)
+	out := make(chan []string, s.chanBufferSize)
 
 	wg.Add(1)
 	go func() {
-		processor.Process(ctx, input, out)
+		s.messageProcessor.Process(ctx, input, out)
 		wg.Done()
 	}()
 
 	wg.Add(1)
 	go func() {
-		consumer.Subscribe(ctx, input)
+		s.consumer.Subscribe(ctx, input)
 		wg.Done()
 	}()
 
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		consumer.Acknowledge(ctx, out)
+		s.consumer.Acknowledge(ctx, out)
 	}()
 }

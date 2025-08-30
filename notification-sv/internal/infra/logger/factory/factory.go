@@ -6,35 +6,21 @@ import (
 
 	"github.com/ipavlov93/universe-demo/universe-pkg/logger"
 	"go.uber.org/zap"
-
-	zapfactory "github.com/ipavlov93/universe-demo/notification-sv/internal/infra/logger/zap"
 )
 
-func NewAppLoggerOrDefault(level string) (logger.Logger, error) {
-	lg, err := newLogger(os.Stdout, level)
-	if err != nil {
-		return newDefaultAppLogger()
-	}
-	return lg, nil
+func NewStdoutLogger(minLevel string) (logger.Logger, error) {
+	return NewLogger(os.Stdout, minLevel)
 }
 
-func newLogger(w io.Writer, level string) (logger.Logger, error) {
-	logLevel, err := logger.ParseLevel(level)
-	if err != nil {
-		return nil, err
-	}
-
-	return zapfactory.New(w, logLevel), nil
+func NewStdoutLoggerInfoLevel() (logger.Logger, error) {
+	return NewLogger(os.Stdout, zap.InfoLevel.String())
 }
 
-func newDefaultAppLogger() (logger.Logger, error) {
-	lg, err := newLoggerInfo()
+func NewLogger(w io.Writer, level string) (logger.Logger, error) {
+	minLevel, err := logger.ParseLevel(level)
 	if err != nil {
 		return nil, err
 	}
-	return lg, nil
-}
 
-func newLoggerInfo() (logger.Logger, error) {
-	return newLogger(os.Stdout, zap.InfoLevel.String())
+	return NewZapLogger(w, minLevel), nil
 }
