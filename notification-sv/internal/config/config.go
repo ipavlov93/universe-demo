@@ -1,10 +1,10 @@
+// Package config contains app config and functionality to load it from env variables or set default values.
 package config
 
 import (
 	"github.com/ipavlov93/universe-demo/universe-pkg/env"
 )
 
-// Config represents app config
 type Config struct {
 	MinLogLevel       string
 	WorkersBufferSize int
@@ -20,7 +20,7 @@ type LocalStackConfig struct {
 	Queue           string
 }
 
-// LoadConfigEnv sets Config with environment variables values
+// LoadConfigEnv sets Config with environment variables values or default values otherwise.
 func LoadConfigEnv() Config {
 	return Config{
 		MinLogLevel:       env.EnvironmentVariable("APP_MIN_LOG_LEVEL", "info"),

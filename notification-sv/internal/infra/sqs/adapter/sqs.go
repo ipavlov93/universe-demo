@@ -1,3 +1,4 @@
+// Package adapter contains message broker adapter specific implementations.
 package adapter
 
 import (
@@ -5,9 +6,8 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
-	sqspkg "github.com/ipavlov93/universe-demo/universe-pkg/sqs"
-
 	"github.com/ipavlov93/universe-demo/notification-sv/internal/config"
+	sqspkg "github.com/ipavlov93/universe-demo/universe-pkg/sqs"
 )
 
 type Adapter struct {

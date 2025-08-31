@@ -19,5 +19,5 @@ goimports:
 mockery_install:
 	go install github.com/vektra/mockery/v3@v3.3.2
 
-# usage example:
-	# mockery --name=YourService --dir=your_path --output=your_path/mocks
+mockery_generate_mocks:
+	mockery --config ./internal/mocks/.mockery.yaml
