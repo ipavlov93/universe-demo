@@ -4,10 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/ipavlov93/universe-demo/notification-sv/internal/message"
 	"github.com/ipavlov93/universe-demo/product-eventbus-pkg/event"
 	msgpkg "github.com/ipavlov93/universe-demo/product-eventbus-pkg/message"
-
-	"github.com/ipavlov93/universe-demo/notification-sv/internal/message"
 )
 
 type Logger interface {
@@ -59,28 +58,16 @@ func (m *MessageLogger) process(envelopes []*message.Envelope, out chan<- []stri
 		}
 
 		// todo: add error sending to separate channel
-		err := m.parseAndLogMessage(envelope.Message)
+		eventPayload, err := event.ParsePayload(envelope.Message.Headers.EventType, envelope.Message.Payload)
 		if err != nil {
 			m.lg.Log(err.Error())
 		}
 
+		m.logMessage(envelope.Message, eventPayload)
+
 		receiptHandles = append(receiptHandles, envelope.ReceiptHandle)
 	}
 	out <- receiptHandles
-}
-
-func (m *MessageLogger) parseAndLogMessage(msg *msgpkg.Message) error {
-	if msg == nil {
-		return nil
-	}
-
-	eventPayload, err := event.ParsePayload(msg.Headers.EventType, msg.Payload)
-	if err != nil {
-		return err
-	}
-
-	m.logMessage(msg, eventPayload)
-	return nil
 }
 
 func (m *MessageLogger) logMessage(msg *msgpkg.Message, eventPayload any) {
