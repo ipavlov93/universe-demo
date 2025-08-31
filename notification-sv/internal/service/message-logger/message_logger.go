@@ -2,20 +2,22 @@ package processor
 
 import (
 	"context"
-
-	"github.com/ipavlov93/universe-demo/product-eventbus-pkg/event"
-	msgpkg "github.com/ipavlov93/universe-demo/product-eventbus-pkg/message"
-	"github.com/ipavlov93/universe-demo/universe-pkg/logger"
-	"go.uber.org/zap"
+	"fmt"
 
 	"github.com/ipavlov93/universe-demo/notification-sv/internal/message"
+	"github.com/ipavlov93/universe-demo/product-eventbus-pkg/event"
+	msgpkg "github.com/ipavlov93/universe-demo/product-eventbus-pkg/message"
 )
 
-type MessageLogger struct {
-	lg logger.Logger
+type Logger interface {
+	Log(msg string)
 }
 
-func NewMessageLogger(lg logger.Logger) *MessageLogger {
+type MessageLogger struct {
+	lg Logger
+}
+
+func NewMessageLogger(lg Logger) *MessageLogger {
 	return &MessageLogger{
 		lg: lg,
 	}
@@ -31,7 +33,6 @@ func (m *MessageLogger) Process(
 ) {
 	defer func() {
 		close(out)
-		m.lg.Sync()
 	}()
 
 	for {
@@ -50,7 +51,10 @@ func (m *MessageLogger) Process(
 				}
 
 				// todo: add error sending to separate channel
-				m.ParseAndLogMessage(envelope.Message)
+				err := m.ParseAndLogMessage(envelope.Message)
+				if err != nil {
+					m.lg.Log(err.Error())
+				}
 
 				receiptHandles = append(receiptHandles, envelope.ReceiptHandle)
 			}
@@ -78,10 +82,14 @@ func (m *MessageLogger) logMessage(msg *msgpkg.Message, eventPayload any) {
 		return
 	}
 
-	m.lg.Info("Message logged",
-		zap.String("message_id", msg.Headers.MessageID),
-		zap.String("event_type", msg.Headers.EventType),
-		zap.String("producer", msg.Headers.Producer),
-		zap.Any("event", eventPayload),
+	logRow := fmt.Sprintf(
+		"Message logged | message_id=%s | event_type=%s | producer=%s | event=%+v",
+		msg.Headers.MessageID,
+		msg.Headers.EventType,
+		msg.Headers.Producer,
+		eventPayload,
 	)
+
+	m.lg.Log(logRow)
+	return
 }

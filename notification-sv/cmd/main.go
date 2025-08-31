@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/ipavlov93/universe-demo/notification-sv/internal/config"
-	logfactory "github.com/ipavlov93/universe-demo/notification-sv/internal/infra/logger/factory"
+	logfactory "github.com/ipavlov93/universe-demo/notification-sv/internal/infra/logger/zap/factory"
 	adapterfactory "github.com/ipavlov93/universe-demo/notification-sv/internal/infra/sqs/adapter/factory"
 	"github.com/ipavlov93/universe-demo/notification-sv/internal/service/consumer"
 	msglogfactory "github.com/ipavlov93/universe-demo/notification-sv/internal/service/message-logger/factory"
@@ -27,7 +27,7 @@ func main() {
 	appLogger := logfactory.NewAppLogger(os.Stdout, appConfig.MinLogLevel)
 	defer appLogger.Sync()
 
-	messageLogger, err := msglogfactory.NewMessageLogger(os.Stdout, appConfig.MinLogLevel)
+	messageLogger, err := msglogfactory.NewMessageLogger(os.Stdout)
 	if err != nil {
 		appLogger.Fatal("failed to create MessageLogger", zap.Error(err))
 	}
