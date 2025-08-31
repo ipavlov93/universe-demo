@@ -8,13 +8,14 @@ import (
 	"syscall"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/ipavlov93/universe-demo/notification-sv/internal/config"
 	logfactory "github.com/ipavlov93/universe-demo/notification-sv/internal/infra/logger/zap/factory"
 	adapterfactory "github.com/ipavlov93/universe-demo/notification-sv/internal/infra/sqs/adapter/factory"
 	"github.com/ipavlov93/universe-demo/notification-sv/internal/service/consumer"
 	msglogfactory "github.com/ipavlov93/universe-demo/notification-sv/internal/service/message-logger/factory"
 	"github.com/ipavlov93/universe-demo/notification-sv/internal/service/worker"
-	"go.uber.org/zap"
 )
 
 func main() {

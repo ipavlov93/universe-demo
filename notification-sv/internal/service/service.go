@@ -14,6 +14,6 @@ type MessageProcessor interface {
 type Consumer interface {
 	// Subscribe starts reading from the external broker and sending messages to out channel.
 	Subscribe(ctx context.Context, out chan<- []*message.Envelope)
-	// Acknowledge starts reading from input channel and sending delete request to external broker.
+	// Acknowledge starts reading from input channel and sending acknowledge to external broker.
 	Acknowledge(parentCtx context.Context, input <-chan []string)
 }
