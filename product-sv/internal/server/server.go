@@ -6,9 +6,7 @@ import (
 	productctrl "github.com/ipavlov93/universe-demo/product-sv/internal/controller/product"
 )
 
-func ConfigureRoutes(productController *productctrl.ProductController) http.Handler {
-	mux := http.NewServeMux()
-
+func ConfigureRoutes(mux *http.ServeMux, productController *productctrl.ProductController) http.Handler {
 	mux.HandleFunc("/v1/products", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:

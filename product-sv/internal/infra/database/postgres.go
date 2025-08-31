@@ -1,12 +1,12 @@
+// Package database contains database adapter specific implementations.
 package database
 
 import (
 	"fmt"
 
+	"github.com/ipavlov93/universe-demo/product-sv/internal/config"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-
-	"github.com/ipavlov93/universe-demo/product-sv/internal/config"
 )
 
 type PostgresAdapter struct {

@@ -1,10 +1,10 @@
+// Package config contains app config and functionality to load it from env variables or set default values.
 package config
 
 import (
 	"github.com/ipavlov93/universe-demo/universe-pkg/env"
 )
 
-// Config represents app config
 type Config struct {
 	ServerPort    int
 	MinLogLevel   string
@@ -30,7 +30,7 @@ type LocalStackConfig struct {
 	Queue           string
 }
 
-// LoadConfigEnv sets Config with environment variables values
+// LoadConfigEnv sets Config with environment variables values or default values otherwise.
 func LoadConfigEnv() Config {
 	return Config{
 		ServerPort:  env.ParseIntEnv("PRODUCT_SV_HTTP_SERVER_PORT", 0),

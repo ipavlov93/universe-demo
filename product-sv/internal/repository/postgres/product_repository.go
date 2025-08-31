@@ -6,13 +6,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ipavlov93/universe-demo/universe-pkg/logger"
-	"github.com/jmoiron/sqlx"
-
 	"github.com/ipavlov93/universe-demo/product-sv/internal/domain"
 	"github.com/ipavlov93/universe-demo/product-sv/internal/dto/dmodel"
 	errs "github.com/ipavlov93/universe-demo/product-sv/internal/error"
 	mapper "github.com/ipavlov93/universe-demo/product-sv/internal/mapper/product/dmodel"
+	"github.com/ipavlov93/universe-demo/universe-pkg/logger"
+	"github.com/jmoiron/sqlx"
 )
 
 type UserRepositoryPostgres struct {
@@ -53,7 +52,7 @@ func (repo *UserRepositoryPostgres) CreateProduct(ctx context.Context, product d
 	).Scan(&productID)
 	if err != nil {
 		if len(err.Error()) > 50 && err.Error()[:50] == pqDuplicateErr {
-			return 0, errs.ErrProductExists.WithReason(pqDuplicateErr)
+			return 0, errs.ErrProductExists
 		}
 		return 0, errs.ErrDB.WithReason(err.Error())
 	}
