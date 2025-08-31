@@ -3,6 +3,7 @@ package consumer
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
@@ -84,15 +85,36 @@ func (s *ServiceSQS) Acknowledge(parentCtx context.Context, out <-chan []string)
 	for {
 		select {
 		case <-parentCtx.Done():
-			return
+			s.gracefulStop(out)
 		case receiptHandles, ok := <-out:
 			if !ok {
 				return
 			}
+
 			err := s.deleteBatch(parentCtx, receiptHandles)
 			if err != nil {
 				s.lg.Error("failed to delete messages", zap.Error(err))
 			}
+		}
+	}
+}
+
+func (s *ServiceSQS) gracefulStop(out <-chan []string) {
+	drainCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	for {
+		select {
+		case receiptHandles, ok := <-out:
+			if !ok {
+				return
+			}
+
+			if err := s.deleteBatch(drainCtx, receiptHandles); err != nil {
+				s.lg.Error("failed to delete messages", zap.Error(err))
+			}
+		case <-drainCtx.Done():
+			return
 		}
 	}
 }
