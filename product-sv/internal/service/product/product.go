@@ -28,7 +28,7 @@ func (s *Service) GetProductByID(ctx context.Context, productID int64) (obj doma
 }
 
 func (s *Service) CreateProduct(ctx context.Context, product domain.Product) (int64, error) {
-	if !product.Valid() {
+	if product.Name == "" {
 		return 0, apperror.ErrInvalidArgument
 	}
 

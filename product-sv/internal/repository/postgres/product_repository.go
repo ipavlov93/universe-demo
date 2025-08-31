@@ -26,21 +26,6 @@ func NewUserRepository(dbDriver sqlx.ExtContext) *UserRepositoryPostgres {
 	}
 }
 
-func (repo *UserRepositoryPostgres) GetUsersTotalCount(ctx context.Context) (int64, error) {
-	var count int64
-	err := sqlx.GetContext(ctx, repo.dbDriver, &count,
-		`SELECT count(*) FROM products`)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return 0, nil
-		}
-		errInfo := fmt.Sprintf("repository.GetProductByID: %v", err)
-		return 0, errs.ErrDB.WithReason(errInfo)
-	}
-
-	return count, nil
-}
-
 // GetProductByID will return errs.ErrProductNotFound if no matching record exists.
 func (repo *UserRepositoryPostgres) GetProductByID(ctx context.Context, productID int64) (obj domain.Product, err error) {
 	var errorInfo string
@@ -51,11 +36,10 @@ func (repo *UserRepositoryPostgres) GetProductByID(ctx context.Context, productI
 				WHERE id = $1`, productID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			errorInfo = fmt.Sprintf("repository.GetProductByID: user not found for ID=%d", productID)
+			errorInfo = fmt.Sprintf("product ID=%d not found", productID)
 			return domain.Product{}, errs.ErrProductNotFound.WithReason(errorInfo)
 		}
-		errorInfo = fmt.Sprintf("repository.GetProductByID: %v", err)
-		return domain.Product{}, errs.ErrDB.WithReason(errorInfo)
+		return domain.Product{}, errs.ErrDB.WithReason(err.Error())
 	}
 	return mapper.ProductDtoToProduct(productDto), nil
 }
@@ -68,25 +52,22 @@ func (repo *UserRepositoryPostgres) CreateProduct(ctx context.Context, product d
 		product.Name, product.Description,
 	).Scan(&productID)
 	if err != nil {
-		errorInfo := fmt.Sprintf("repository.CreateProduct: %v", err)
-
 		if len(err.Error()) > 50 && err.Error()[:50] == pqDuplicateErr {
-			return 0, errs.ErrProductExists.WithReason(errorInfo)
+			return 0, errs.ErrProductExists.WithReason(pqDuplicateErr)
 		}
-		return 0, errs.ErrDB.WithReason(errorInfo)
+		return 0, errs.ErrDB.WithReason(err.Error())
 	}
 	return productID, nil
 }
 
 func (repo *UserRepositoryPostgres) DeleteProductByID(ctx context.Context, productID int64) error {
-	err := repo.dbDriver.QueryRowxContext(
+	_, err := repo.dbDriver.ExecContext(
 		ctx,
 		`DELETE FROM products WHERE id = $1`,
 		productID,
 	)
 	if err != nil {
-		errorInfo := fmt.Sprintf("repository.DeleteProductByID: %v", err)
-		return errs.ErrDB.WithReason(errorInfo)
+		return errs.ErrDB.WithReason(err.Error())
 	}
 	return nil
 }

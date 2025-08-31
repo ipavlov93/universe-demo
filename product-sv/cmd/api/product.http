@@ -1,0 +1,16 @@
+# Create new product
+POST {{host}}/v1/products
+Content-Type: application/json
+
+{
+"name": "Product Name1",
+"description": "Description1"
+}
+
+###
+# Get existing product by ID
+GET {{host}}/v1/products/123
+
+###
+# Delete existing product by ID
+DELETE {{host}}/v1/products/123

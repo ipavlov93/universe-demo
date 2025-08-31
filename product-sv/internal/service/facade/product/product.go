@@ -1,4 +1,4 @@
-package facade
+package product
 
 import (
 	"context"
@@ -6,29 +6,29 @@ import (
 
 	"github.com/ipavlov93/universe-demo/product-eventbus-pkg/event"
 	"github.com/ipavlov93/universe-demo/product-eventbus-pkg/message"
-	"github.com/ipavlov93/universe-demo/universe-pkg/logger"
-	"go.uber.org/zap"
-
+	"github.com/ipavlov93/universe-demo/product-sv/internal/controller"
 	"github.com/ipavlov93/universe-demo/product-sv/internal/domain"
 	eventmapper "github.com/ipavlov93/universe-demo/product-sv/internal/mapper/product/event"
-	"github.com/ipavlov93/universe-demo/product-sv/internal/service"
+	"github.com/ipavlov93/universe-demo/product-sv/internal/service/facade"
+	"github.com/ipavlov93/universe-demo/universe-pkg/logger"
+	"go.uber.org/zap"
 )
 
 const producerService = "product-sv"
 
 type ServiceFacadeImp struct {
-	productService service.ProductService
-	publisher      service.Publisher
-	promService    service.PrometheusService
+	productService facade.ProductService
+	publisher      facade.Publisher
+	promService    facade.PrometheusService
 	lg             logger.Logger
 }
 
 func NewServiceFacade(
-	productService service.ProductService,
-	publisher service.Publisher,
-	promService service.PrometheusService,
+	productService facade.ProductService,
+	publisher facade.Publisher,
+	promService facade.PrometheusService,
 	lg logger.Logger,
-) service.Facade {
+) controller.ProductServiceFacade {
 	return &ServiceFacadeImp{
 		productService: productService,
 		publisher:      publisher,
@@ -47,11 +47,10 @@ func (f *ServiceFacadeImp) CreateProduct(ctx context.Context, product domain.Pro
 		return 0, err
 	}
 
-	go f.promService.IncProductsCreated()
+	f.promService.IncProductsCreated()
 
 	err = f.publishProductCreatedEvent(ctx, product)
 	if err != nil {
-		// TODO: add retry strategy
 		f.lg.Error("failed to publish message",
 			zap.Error(err),
 			zap.Int64("product_id", productID),
@@ -71,12 +70,11 @@ func (f *ServiceFacadeImp) DeleteProduct(ctx context.Context, productID int64) e
 		return err
 	}
 
-	go f.promService.IncProductsDeleted()
+	f.promService.IncProductsDeleted()
 
 	deletedAt := time.Now()
 	err = f.publishProductDeletedEvent(ctx, productObj, deletedAt)
 	if err != nil {
-		// TODO: add retry strategy
 		f.lg.Error("failed to publish message",
 			zap.Error(err),
 			zap.Int64("product_id", productID),

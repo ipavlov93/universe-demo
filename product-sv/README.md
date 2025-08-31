@@ -49,6 +49,6 @@ docker run --env-file ./.env product-sv ../
 
 Future improvements:
  
-1. Service layer performs sequence of unreliable request to external systems. 
-It's recommended to add distributed transaction or alternative approach.
+1. Service and Facade layer performs sequence of unreliable request to external systems. 
+It's recommended to add distributed transaction or alternative approach with retry strategy in background.
 2. Add tests.

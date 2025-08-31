@@ -9,11 +9,10 @@ import (
 	"syscall"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"go.uber.org/zap"
 
 	"github.com/ipavlov93/universe-demo/product-sv/internal/config"
 	"github.com/ipavlov93/universe-demo/product-sv/internal/controller/product/factory"
-	logfactory "github.com/ipavlov93/universe-demo/product-sv/internal/infra/logger/factory"
+	logfactory "github.com/ipavlov93/universe-demo/product-sv/internal/infra/logger/zap/factory"
 	"github.com/ipavlov93/universe-demo/product-sv/internal/server"
 )
 
@@ -23,15 +22,11 @@ func main() {
 	signalCh := make(chan os.Signal, 1)
 	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)
 
-	lg, err := logfactory.NewAppLoggerOrDefault(appConfig.MinLogLevel)
-	if err != nil {
-		lg = zap.NewNop()
-	}
-
-	defer lg.Sync()
+	appLogger := logfactory.NewAppLogger(os.Stdout, appConfig.MinLogLevel)
+	defer appLogger.Sync()
 
 	parentCtx, parentCancel := context.WithCancel(context.Background())
-	productCtrl := factory.NewProductController(parentCtx, appConfig, lg)
+	productCtrl := factory.NewProductController(parentCtx, appConfig, appLogger)
 
 	httpHandler := server.ConfigureRoutes(productCtrl)
 
@@ -42,5 +37,5 @@ func main() {
 		parentCancel()
 	}()
 
-	server.Listen(parentCtx, fmt.Sprintf(":%d", appConfig.ServerPort), httpHandler, lg)
+	server.Listen(parentCtx, fmt.Sprintf(":%d", appConfig.ServerPort), httpHandler, appLogger)
 }

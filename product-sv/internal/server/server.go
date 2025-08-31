@@ -9,8 +9,16 @@ import (
 func ConfigureRoutes(productController *productctrl.ProductController) http.Handler {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/product", productController.CreateProductHandler)
-	mux.HandleFunc("/product/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/v1/products", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodPost:
+			productController.CreateProductHandler(w, r)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	})
+
+	mux.HandleFunc("/v1/products/{id}", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
 			productController.GetProductHandler(w, r)

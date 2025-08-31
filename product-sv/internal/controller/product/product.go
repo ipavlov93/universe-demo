@@ -7,22 +7,20 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/ipavlov93/universe-demo/universe-pkg/logger"
-
 	"github.com/ipavlov93/universe-demo/product-sv/internal/controller"
-	"github.com/ipavlov93/universe-demo/product-sv/internal/controller/product/dto"
 	"github.com/ipavlov93/universe-demo/product-sv/internal/dto/smodel"
 	apperror "github.com/ipavlov93/universe-demo/product-sv/internal/error"
 	mapper "github.com/ipavlov93/universe-demo/product-sv/internal/mapper/product/smodel"
-	"github.com/ipavlov93/universe-demo/product-sv/internal/service"
+	errorpkg "github.com/ipavlov93/universe-demo/universe-pkg/error"
+	"github.com/ipavlov93/universe-demo/universe-pkg/logger"
 )
 
 type ProductController struct {
-	productSrvFacade service.Facade
+	productSrvFacade controller.ProductServiceFacade
 	lg               logger.Logger
 }
 
-func NewController(productSrvFacade service.Facade, lg logger.Logger) *ProductController {
+func NewController(productSrvFacade controller.ProductServiceFacade, lg logger.Logger) *ProductController {
 	return &ProductController{
 		productSrvFacade: productSrvFacade,
 		lg:               lg,
@@ -30,14 +28,9 @@ func NewController(productSrvFacade service.Facade, lg logger.Logger) *ProductCo
 }
 
 func (c *ProductController) GetProductHandler(w http.ResponseWriter, r *http.Request) {
-	productIDStr, err := controller.GetIDFromPath(r.URL.Path)
+	productID, err := pathValueID(r, "id")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	productID, err := strconv.ParseInt(productIDStr, 10, 64)
-	if err != nil {
-		http.Error(w, "Invalid productID format", http.StatusBadRequest)
+		writeErrorStatusCode(w, err)
 		return
 	}
 
@@ -45,28 +38,28 @@ func (c *ProductController) GetProductHandler(w http.ResponseWriter, r *http.Req
 	if err != nil {
 		if errors.Is(err, apperror.ErrProductNotFound) {
 			http.Error(w, err.Error(), http.StatusNotFound)
+			return
 		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	err = json.NewEncoder(w).Encode(product)
+	productDTO := mapper.ProductToProductDto(product)
+	err = json.NewEncoder(w).Encode(productDTO)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	if err = json.NewEncoder(w).Encode(product); err != nil {
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-	}
 }
 
 func (c *ProductController) CreateProductHandler(w http.ResponseWriter, r *http.Request) {
 	var productDTO smodel.Product
 
 	if err := json.NewDecoder(r.Body).Decode(&productDTO); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, apperror.ErrInvalidArgument.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -83,17 +76,45 @@ func (c *ProductController) CreateProductHandler(w http.ResponseWriter, r *http.
 }
 
 func (c *ProductController) DeleteProductHandler(w http.ResponseWriter, r *http.Request) {
-	var productDTO dto.ProductDelete
-
-	if err := json.NewDecoder(r.Body).Decode(&productDTO); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	productID, err := pathValueID(r, "id")
+	if err != nil {
+		writeErrorStatusCode(w, err)
 		return
 	}
 
-	if err := c.productSrvFacade.DeleteProduct(r.Context(), productDTO.ProductID); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	err = c.productSrvFacade.DeleteProduct(r.Context(), productID)
+	if err != nil {
+		writeErrorStatusCode(w, err)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func writeErrorStatusCode(w http.ResponseWriter, err error) {
+	var appError errorpkg.AppError
+	if !errors.As(err, &appError) {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	writeAppError(w, appError)
+}
+
+func writeAppError(w http.ResponseWriter, appError errorpkg.AppError) {
+	code, errorMsg := appError.ToHTTP()
+	http.Error(w, errorMsg, code)
+}
+
+func pathValueID(r *http.Request, idKey string) (int64, error) {
+	productIDStr := r.PathValue(idKey)
+	if productIDStr == "" {
+		return 0, apperror.ErrNotFound
+	}
+
+	productID, err := strconv.ParseInt(productIDStr, 10, 64)
+	if err != nil {
+		return 0, apperror.ErrInvalidArgument.WithReason(
+			fmt.Sprintf("invalid product id: %s", productIDStr))
+	}
+	return productID, nil
 }

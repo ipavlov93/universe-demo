@@ -1,0 +1,5 @@
+packages:
+  github.com/ipavlov93/universe-demo/product-sv/internal/mocks:
+    config:
+      dir: ./internal/mocks
+      all: true

@@ -1,3 +1,4 @@
+// Package adapter contains message broker adapter specific implementations.
 package adapter
 
 import (
@@ -5,16 +6,16 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
-	sqspkg "github.com/ipavlov93/universe-demo/universe-pkg/sqs"
-
 	"github.com/ipavlov93/universe-demo/product-sv/internal/config"
+	"github.com/ipavlov93/universe-demo/product-sv/internal/service/publisher"
+	sqspkg "github.com/ipavlov93/universe-demo/universe-pkg/sqs"
 )
 
 type Adapter struct {
 	client *sqs.Client
 }
 
-func (a *Adapter) Client() *sqs.Client {
+func (a *Adapter) Client() publisher.SQSClientAPI {
 	return a.client
 }
 
