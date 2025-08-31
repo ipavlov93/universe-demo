@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ipavlov93/universe-demo/notification-sv/internal/message"
 	"github.com/ipavlov93/universe-demo/product-eventbus-pkg/event"
 	msgpkg "github.com/ipavlov93/universe-demo/product-eventbus-pkg/message"
+
+	"github.com/ipavlov93/universe-demo/notification-sv/internal/message"
 )
 
 type Logger interface {
@@ -23,9 +24,10 @@ func NewMessageLogger(lg Logger) *MessageLogger {
 	}
 }
 
-// Process starts to log messages in a separate goroutine.
-// It respects context cancellation (e.g., via <-ctx.Done()) and wait group by design.
-// Notice: actual logs format is different from JSON.
+// Process starts long-running process of logging messages.
+// Process will end after one of following conditions:
+// 1. input channel is closed.
+// 2. ctx is done.
 func (m *MessageLogger) Process(
 	ctx context.Context,
 	input <-chan []*message.Envelope,
@@ -44,26 +46,30 @@ func (m *MessageLogger) Process(
 				return
 			}
 
-			var receiptHandles []string
-			for _, envelope := range envelopes {
-				if envelope == nil {
-					continue
-				}
-
-				// todo: add error sending to separate channel
-				err := m.ParseAndLogMessage(envelope.Message)
-				if err != nil {
-					m.lg.Log(err.Error())
-				}
-
-				receiptHandles = append(receiptHandles, envelope.ReceiptHandle)
-			}
-			out <- receiptHandles
+			m.process(envelopes, out)
 		}
 	}
 }
 
-func (m *MessageLogger) ParseAndLogMessage(msg *msgpkg.Message) error {
+func (m *MessageLogger) process(envelopes []*message.Envelope, out chan<- []string) {
+	var receiptHandles []string
+	for _, envelope := range envelopes {
+		if envelope == nil {
+			continue
+		}
+
+		// todo: add error sending to separate channel
+		err := m.parseAndLogMessage(envelope.Message)
+		if err != nil {
+			m.lg.Log(err.Error())
+		}
+
+		receiptHandles = append(receiptHandles, envelope.ReceiptHandle)
+	}
+	out <- receiptHandles
+}
+
+func (m *MessageLogger) parseAndLogMessage(msg *msgpkg.Message) error {
 	if msg == nil {
 		return nil
 	}
