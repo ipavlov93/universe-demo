@@ -56,8 +56,6 @@ services:
     image: prom/prometheus:v3.5.0
     ports:
       - "${PROMETHEUS_PORT}:9090"
-    environment:
-      - PRODUCT_SV_PORT="${PRODUCT_SV_PORT:-8080}"
     volumes:
       - "./prometheus.yml:/etc/prometheus/prometheus.yml"
     networks:
