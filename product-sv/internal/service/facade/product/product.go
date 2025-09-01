@@ -49,6 +49,9 @@ func (f *ServiceFacadeImp) CreateProduct(ctx context.Context, product domain.Pro
 
 	f.promService.IncProductsCreated()
 
+	product.ID = productID
+	product.CreatedAt = time.Now()
+
 	err = f.publishProductCreatedEvent(ctx, product)
 	if err != nil {
 		f.lg.Error("failed to publish message",
