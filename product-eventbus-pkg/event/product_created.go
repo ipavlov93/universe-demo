@@ -46,23 +46,18 @@ func (p *ProductCreatedEvent) UnmarshalJSON(data []byte) error {
 // MarshalJSON serialises instance to JSON with time.RFC3339 format for timestamps.
 func (p *ProductCreatedEvent) MarshalJSON() ([]byte, error) {
 	aux := &struct {
-		CreatedAt string `json:"created_at"`
-		*productCreated
+		ID          int64  `json:"id"`
+		Name        string `json:"name"`
+		Description string `json:"description,omitempty"`
+		DeletedAt   string `json:"deleted_at"`
 	}{
-		CreatedAt:      p.CreatedAt.Format(timeFormatRFC3339),
-		productCreated: convertProductCreatedEvent(p),
-	}
-
-	return json.Marshal(aux)
-}
-
-func convertProductCreatedEvent(p *ProductCreatedEvent) *productCreated {
-	return &productCreated{
 		ID:          p.ID,
 		Name:        p.Name,
 		Description: p.Description,
-		CreatedAt:   p.CreatedAt.String(),
+		DeletedAt:   p.CreatedAt.Format(time.RFC3339),
 	}
+
+	return json.Marshal(aux)
 }
 
 func (p *ProductCreatedEvent) setEvent(pc *productCreated, createdAt time.Time) {

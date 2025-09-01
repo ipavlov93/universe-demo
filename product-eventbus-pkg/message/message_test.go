@@ -8,11 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type ProductCreated struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
-}
-
 func TestMessage_Decode(t *testing.T) {
 	t.Run("Valid JSON should be decoded correctly", func(t *testing.T) {
 		// ARRANGE
