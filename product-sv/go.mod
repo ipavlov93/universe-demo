@@ -9,7 +9,7 @@ replace github.com/ipavlov93/universe-demo/product-eventbus-pkg => ../product-ev
 require (
 	github.com/aws/aws-sdk-go-v2 v1.38.2
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.42.2
-	github.com/ipavlov93/universe-demo/product-eventbus-pkg v0.0.0-20250828161853-3bc8c30741e3
+	github.com/ipavlov93/universe-demo/product-eventbus-pkg v0.0.0-20250829075932-8ef4a31a5cba
 	github.com/ipavlov93/universe-demo/universe-pkg v0.0.0-20250828161853-3bc8c30741e3
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/lib/pq v1.10.9
