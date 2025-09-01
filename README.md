@@ -11,7 +11,7 @@ universe-demo consists of Go modules:
 
 ## Demo branch
 
-The actual branch for demo (with latest changes) `branch-for-demo`: https://github.com/ipavlov93/universe-demo/tree/branch-for-demo
+The actual branch for demo (with latest changes) `branch-for-demo-v2`: https://github.com/ipavlov93/universe-demo/tree/branch-for-demo-v2
 
 ---
 
@@ -39,7 +39,7 @@ There are several options how you can run this mono repository's apps using:
 2. Docker
 3. Docker Compose
 
-### env file
+### env file for docker-compose run
 
 1. Create copy of [.env.example](.env.example) file.
 2. Set values depends on your environment.
@@ -65,14 +65,9 @@ docker-compose -f ./compose/docker-compose.yml up -d
 
 ---
 
-## Development
+## Run migrations
 
-
-#### Generate mocks using mockery
-
-`mockery --name=YourService --dir=your_path --output=your_path/mocks`
-
-### Migration tool
+### Migration tool prerequisites
 
 Prerequisites: [goose](https://github.com/pressly/goose).
 
@@ -81,14 +76,11 @@ Installation:
 go install github.com/pressly/goose/v3/cmd/goose@latest
 `
 
-Look at [Makefile](.product-sv/cmd/migrator/Makefile) that contains ready-to-use commands for running database migrations.
+Run example:
+`GOOSE_DRIVER=postgres GOOSE_DBSTRING=${GOOSE_DBSTRING} GOOSE_MIGRATION_DIR=./product-sv/internal/migrations/postgres goose up-by-one`
 
-### Formatting
+You can find ready-to-use commands for running database migrations in [Makefile][Migrator-Makefile].
 
-`go fmt ./...`
+---
 
-### goimports
-
-To group and sort import sections example:
-
-`goimports --local universe-demo -l -w .`
+[Migrator-Makefile]: ./product-sv/cmd/migrator/Makefile

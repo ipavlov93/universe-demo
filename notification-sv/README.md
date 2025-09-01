@@ -6,17 +6,19 @@ Microservice written in Go designed as three-stage pipeline using workers and ch
 
 ## Run Prerequisites
 
-There are several options how you can run app using:
+### env file for docker-compose run
+
+1. Create copy of [.env.example](../.env.example) file.
+2. Set values depends on your environment.
+3. Move .env file to ./compose directory.
+
+### Optional Run Prerequisites
+
+Optional prerequisites depend on the following options how you run this app using:
 
 1. Go (1.24.6 or upper)
 2. Docker
 3. Docker Compose
-
-### env file
-
-1. Create copy of [.env.example](../.env.example) file.
-2. Set values depends on your environment.
-3. Move .env file to current directory.
 
 ---
 
@@ -40,11 +42,21 @@ docker run --env-file ./.env notification-sv ../
 App designed as three-stage pipeline using workers and channel.
 Buffered channels are used to prevent immediate block on channel send operation.
 
+### MessageProcessor
+
+Represents a component that writes incoming messages to given io.Writer concurrently.
+Send processed message's receiptHandles to next pipeline's stage. 
+
+### Consumer
+
+Represents a component with two pipeline's stages:
+1. Consuming messages from external message broker concurrently.
+2. Acknowledging message receive to message broker concurrently.
+
 ---
 
 ## TODO
 
 Future improvements:
  
-1. Consumer and Processor workers should have possibility to process remaining in-memory messages as part of graceful shutdown.
-2. Add tests.
+1. Add tests.
